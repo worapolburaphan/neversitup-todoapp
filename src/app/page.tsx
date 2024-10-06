@@ -1,3 +1,9 @@
+import { LoginContainer } from '@/features/authentication/components'
+
 export default function Home() {
-  return <div></div>;
+  return (
+    <div className="flex min-h-screen items-center">
+      <LoginContainer />
+    </div>
+  )
 }
