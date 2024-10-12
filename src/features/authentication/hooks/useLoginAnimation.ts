@@ -2,12 +2,20 @@
 import { useAnimate } from 'framer-motion'
 import { useEffect } from 'react'
 
-export function useLoginAnimation<T extends HTMLElement>() {
+export function useLoginStateAnimated<T extends HTMLElement>() {
   const [scope, animate] = useAnimate<T>()
 
   useEffect(() => {
     animate(
-      'img',
+      'div#sun',
+      {
+        opacity: 1,
+        y: '-50%',
+      },
+      { duration: 0.25 }
+    )
+    animate(
+      'img#logo',
       {
         opacity: 1,
       },

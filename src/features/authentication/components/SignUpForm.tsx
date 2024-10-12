@@ -8,10 +8,11 @@ import { useToggle } from '@/features/shared/hooks'
 import { Controller } from 'react-hook-form'
 import { SignUpFormValue, useSignUpForm } from '@/features/authentication/hooks'
 import { useMutation } from '@tanstack/react-query'
-import { postAccount } from '@/services/auth.service'
-import { UserResponse } from '@/models/user'
+import { postAccount } from '@/features/authentication/auth.service'
 import { useAuthStore } from '@/features/authentication/stores'
 import toast from 'react-hot-toast'
+import { PostUserResp } from '@/features/authentication/auth.model'
+import { AxiosError } from 'axios'
 
 const SignUpForm: FC = () => {
   const [isPasswordVisible, togglePasswordVisibility] = useToggle()
@@ -21,10 +22,9 @@ const SignUpForm: FC = () => {
 
   const createAccount = useMutation({
     mutationFn: postAccount,
-    onSuccess: (result: UserResponse) => {
-      const json = result.toJson()
-      if (!json.data?.username) return
-      setUser(json.data.username)
+    onSuccess: (result: PostUserResp) => {
+      if (!result.data?.username) return
+      setUser(result.data.username)
     },
   })
 
@@ -32,15 +32,19 @@ const SignUpForm: FC = () => {
     setValue('step', step + direction, { shouldValidate: true })
   }
 
-  const onSubmit = (data: SignUpFormValue) => {
+  const onSubmit = async (data: SignUpFormValue) => {
     try {
-      createAccount.mutate({ username: data.email, password: data.password })
+      await createAccount.mutateAsync({
+        username: data.email,
+        password: data.password,
+      })
 
       toast.success('Account created successfully')
     } catch (error) {
-      console.error(error)
-
-      toast.error('Failed to create account')
+      navigate(-1)
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message)
+      }
     }
   }
 
